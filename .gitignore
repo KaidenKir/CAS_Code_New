@@ -1,0 +1,13 @@
+*.csv
+*.exe
+*.rse
+*.dat
+*.m
+Eigen*
+ismkal
+Refrence
+SparkFun*
+ArduinoControll
+*pendilum*
+.vs/**
+.vscode/**
