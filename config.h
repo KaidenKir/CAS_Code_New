@@ -50,12 +50,16 @@ struct motorConfig{
     Matrix<double, Dynamic, 3> time_thrust_mass;          // seconds_newtons_grams
 };
 // model for atmosphere
-struct atmosphere{
+class Atmosphere{
+public:
     double density;                 // kg/m^3
     double pressure;                // Pa (unused?)
     double temperature;             // K (unused?)
     double speedOfSound;            // m/s
-};
+
+    // functions
+    
+}
 // current thrust point (CHANGE TO BE VECTOR SO IT DOESNT UPDATE EVERY TIME?)
 struct thrustPoint{
     double time;                    // seconds
