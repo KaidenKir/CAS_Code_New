@@ -1,6 +1,4 @@
-*.csv
 *.exe
-*.rse
 *.dat
 *.m
 Eigen*
@@ -12,3 +10,4 @@ ArduinoControll
 .vs/**
 .vscode/**
 oldMain.cpp
+rocket_flight_data.csv
