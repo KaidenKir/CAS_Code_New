@@ -6,7 +6,6 @@
 #include "Eigen/Eigen/Dense"
 #include "Eigen/Eigen/Geometry"
 
-using namespace std;
 using namespace Eigen;
 
 // --------------------------------------------------------------------------
@@ -23,10 +22,10 @@ inline double sign(double x){
 // Checks if a variable is NaN or Infinity
 inline bool checkIfFinite(double var, string varName){
     if(std::isnan(var)){
-        cout << varName << " is NaN" << endl;
+        std::cout << varName << " is NaN" << endl;
         return true;
     }else if(std::isinf(var)){
-        cout << varName << " is Infinity" << endl;
+        std::cout << varName << " is Infinity" << endl;
     }
     return false;
 }
@@ -34,10 +33,10 @@ inline bool checkIfFinite(double var, string varName){
 // Overload to check if a vector input has a NaN or Infinity
 inline bool checkIfFinite(Vector3d var, string varName){
     if(var.hasNaN()){
-        cout << varName << " has NaN" << endl;
+        std::cout << varName << " has NaN" << endl;
         return true;
     }else if(!var.allFinite()){
-        cout << varName << " has Infinity" << endl;
+        std::cout << varName << " has Infinity" << endl;
     }
     return false;
 }
