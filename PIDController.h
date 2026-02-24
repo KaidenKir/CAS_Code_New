@@ -54,7 +54,7 @@ private:
     double prevActual_ = 0.0;
     double dFiltered_  = 0.0;
     double alpha_      = 0.0;
-    bool initalized    = false;
+    bool initialized_    = false;
 }
 
 class CASController{
@@ -79,12 +79,12 @@ public:
      * Reads state.attitude, state.angularVelocity, state.desiredAttitude.
      * Writes state.finDeflections (clamped to ±maxDeflection degrees).
      */
-    void update(RocketState& state, double dt, double maxDeflections);
+    void update(RocketState& state, double dt, double maxDeflectionDeg);
 
     /** For logging: last commanded rates and control outputs. */
     double pitchRate = 0, yawRate = 0, rollRate = 0;
     double pitchCtrl = 0, yawCtrl = 0, rollCtrl = 0;
-    
+
 private:
     double timeSinceOuter_ = 0.0;
     double timeSinceInner_ = 0.0;

@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <array>
 #include "MathUtils.h"
 #include "RocketState.h"
 
