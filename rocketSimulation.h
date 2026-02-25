@@ -2,7 +2,7 @@
 #pragma once
 
 #include <string>
-#include "rocketConfig.h"       // TO-DO: NEED TO MAKE THIS FILE
+#include "rocketConfig.h"       
 #include "motor.h"
 #include "rocketState.h"
 #include "PIDController.h"
