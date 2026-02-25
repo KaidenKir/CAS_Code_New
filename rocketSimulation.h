@@ -6,7 +6,7 @@
 #include "motor.h"
 #include "rocketState.h"
 #include "PIDController.h"
-#include "flightLogger.h"       // TO-DO: NEED TO MAKE THIS FILE
+#include "flightLogger.h"       
 #include "atmosphere.h"         // TO-DO: NEED TO MAKE THIS FILE
 #include "mathUtils.h"
 
