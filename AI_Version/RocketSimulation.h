@@ -1,14 +1,12 @@
-//TODO: Need to finish a bunch of the files, Im switching to finish the .h files that are needed
 #pragma once
-
 #include <string>
-#include "rocketConfig.h"       
-#include "motor.h"
-#include "rocketState.h"
+#include "RocketConfig.h"
+#include "Motor.h"
+#include "RocketState.h"
 #include "PIDController.h"
-#include "flightLogger.h"       
-#include "atmosphere.h"         // TO-DO: NEED TO MAKE THIS FILE
-#include "mathUtils.h"
+#include "FlightLogger.h"
+#include "Atmosphere.h"
+#include "MathUtils.h"
 
 /**
  * RocketSimulation
@@ -29,19 +27,11 @@
  *   sim.setInitialConditions(launchAngleDeg, perturbation, omega);
  *   sim.run(30.0, "output.csv");
  */
-class RocketSimulation{
+class RocketSimulation {
 public:
-    outerKp = 0.0;
-    outerKi = 0.0;
-    outerKd = 0.0;
+    RocketSimulation(const RocketConfig& config, const Motor& motor);
 
-    innerKp = 0.0;
-    innerKi = 0.0;
-    innerKd = 0.0;
-
-    rocketSimulation(const RocketConfig& config, const Motor& motor);
-
-    //settup
+    // ── Setup ─────────────────────────────────────────────────────────────
 
     /**
      * Sets initial state before calling run().
@@ -54,9 +44,10 @@ public:
                               Vector3d perturbation = Vector3d::Zero(),
                               Vector3d omega        = Vector3d::Zero());
 
-    CASController& cas() {return cas_;}
+    /** Access the CAS controller to set PID gains before running. */
+    CASController& cas() { return cas_; }
 
-    //simulation
+    // ── Simulation ────────────────────────────────────────────────────────
 
     /**
      * Runs the simulation until maxTime (seconds) or ground impact.
@@ -66,18 +57,19 @@ public:
     bool run(double maxTime, const std::string& outputFile, int logInterval = 10);
 
 private:
-    //subsystems
+    // ── Subsystems ────────────────────────────────────────────────────────
     RocketConfig  config_;
     Motor         motor_;
     RocketState   state_;
     CASController cas_;
     FlightLogger  logger_;
 
-    //simulation parameters
-    double dt_ = 0.001; // integration timestep (1ms)
-    bool casOnline_ = false;
+    // ── Simulation parameters ─────────────────────────────────────────────
+    double dt_         = 0.001;   // integration timestep (1 ms)
+    bool   casOnline_  = false;
 
-    //physics
+    // ── Physics ───────────────────────────────────────────────────────────
+
     /**
      * Returns {total aero force (world frame), total aero moment (body frame)}
      * given the current rocket state.
@@ -113,4 +105,4 @@ private:
 
     /** Captures the current state into the FlightLogger. */
     void logCurrentState();
-}
+};
