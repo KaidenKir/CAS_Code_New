@@ -35,6 +35,9 @@ void FlightLogger::record(const Sample& s) {
     fin4_        .push_back(s.fin4);
     mach_        .push_back(s.machNumber);
     dynQ_        .push_back(s.dynamicPressure);
+    cg_          .push_back(s.cp);
+    cp_          .push_back(s.cg);
+    stabArm_     .push_back(s.stabArm);
 }
 
 void FlightLogger::clear() {
@@ -48,7 +51,7 @@ void FlightLogger::clear() {
     reqRollRate_.clear(); reqPitchRate_.clear(); reqYawRate_.clear();
     reqRollCtrl_.clear(); reqPitchCtrl_.clear(); reqYawCtrl_.clear();
     fin1_.clear(); fin2_.clear(); fin3_.clear(); fin4_.clear();
-    mach_.clear(); dynQ_.clear();
+    mach_.clear(); dynQ_.clear(); cg_.clear(); cp_.clear(); stabArm_.clear();
 }
 
 bool FlightLogger::saveCSV(const string& filename) const {
@@ -65,6 +68,7 @@ bool FlightLogger::saveCSV(const string& filename) const {
          << "roll,pitch,yaw,"
          << "roll_rate,pitch_rate,yaw_rate,"
          << "thrust,drag,mass,"
+         << "cg,cp,stability_arm,"
          << "req_roll_rate,req_pitch_rate,req_yaw_rate,"
          << "req_roll_ctrl,req_pitch_ctrl,req_yaw_ctrl,"
          << "fin1,fin2,fin3,fin4,"
@@ -80,6 +84,7 @@ bool FlightLogger::saveCSV(const string& filename) const {
              << roll_[i]        << ',' << pitch_[i]       << ',' << yaw_[i]         << ','
              << rollRate_[i]    << ',' << pitchRate_[i]   << ',' << yawRate_[i]     << ','
              << thrust_[i]      << ',' << drag_[i]        << ',' << mass_[i]        << ','
+             << cg_[i]          << ',' << cp_[i]          << ',' << stabArm_[i]     << ','
              << reqRollRate_[i] << ',' << reqPitchRate_[i]<< ',' << reqYawRate_[i]  << ','
              << reqRollCtrl_[i] << ',' << reqPitchCtrl_[i]<< ',' << reqYawCtrl_[i] << ','
              << fin1_[i]        << ',' << fin2_[i]        << ',' << fin3_[i]        << ',' << fin4_[i] << ','

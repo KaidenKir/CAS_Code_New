@@ -69,7 +69,7 @@ bool RocketConfig::loadSimData(const string& filename){
     int index = 0;
     for(int i = 0; i < mass.size()-1; i++){
         if(indicesToKeep[i] == true){    
-            simData_.row(index) << velocity[i], mass[i], lMOI[i], rMOI[i], CG_location[i], CP_location[i];
+            simData_.row(index) << velocity[i], mass[i], lMOI[i], rMOI[i], CP_location[i], CG_location[i];
             index++;
             //cout << simData_.row(i) << endl;
         }
@@ -125,13 +125,16 @@ pair<double, double> RocketConfig::getCGandCP(double mass, double velocity) cons
     double CP_position = 0.0;
 
     if(simData_.rows() == 0) return {0.0, 0.0};
-    if((velocity <= simData_(0, 0) || (mass >= simData_(0, 1)))) return {simData_(0, 4), simData_(0, 5)};
 
-
+    // Find CP position
     bool foundCP = false;
     for(int i = 1; i < simData_.rows(); i++){
-        if(velocity == simData_(i, 0)){
-            CP_position = simData_(i, 5);
+        if(velocity < simData_(0, 0)){
+            CP_position = simData_(0, 4);
+            foundCP = true;
+            break;
+        } else if(velocity == simData_(i, 0)){
+            CP_position = simData_(i, 4);
             foundCP = true;
             break;  // Only breaks the CP loop now
         }
@@ -139,48 +142,55 @@ pair<double, double> RocketConfig::getCGandCP(double mass, double velocity) cons
             // Linear interpolation
             double velocity_prev = simData_(i-1, 0);
             double velocity_next = simData_(i, 0);
-            double CP_prev = simData_(i-1, 5);
-            double CP_next = simData_(i, 5);
+            double CP_prev = simData_(i-1, 4);
+            double CP_next = simData_(i, 4);
 
             double dVelocity = velocity_next - velocity_prev;
             double alpha = (velocity - velocity_prev) / dVelocity;
             CP_position = CP_prev + alpha * (CP_next - CP_prev);
             foundCP = true;
             break;
-        }
+        } /**else {
+            cout << "CP not found at velocity: " << velocity << endl;
+        }*/
     }
     
     // If no CP found, use last value
     if(!foundCP) {
-        CP_position = simData_(simData_.rows()-1, 5);
+        CP_position = simData_(simData_.rows()-1, 4);
     }
 
-    // Find CG based on mass (column 1 = mass, column 4 = CG)
+    // Find CG based on mass (column 1 = mass, column 5 = CG)
     bool foundCG = false;
     for(int i = 1; i < simData_.rows(); i++){
-        if(mass == simData_(i, 1)){
-            CG_position = simData_(i, 4);
+        if(mass > simData_(0, 1)){
+            CG_position = simData_(0, 5);
+            foundCG = true;
+            break;
+        } else if(mass == simData_(i, 1)){
+            CG_position = simData_(i, 5);
             foundCG = true;
             break;  // Only breaks the CG loop now
-        }
-        else if((mass > simData_(i-1, 1)) && (mass < simData_(i, 1))){
+        } else if((mass < simData_(i-1, 1)) && (mass > simData_(i, 1))){
             // Linear interpolation
             double mass_prev = simData_(i-1, 1);
             double mass_next = simData_(i, 1);
-            double CG_prev = simData_(i-1, 4);
-            double CG_next = simData_(i, 4);
+            double CG_prev = simData_(i-1, 5);
+            double CG_next = simData_(i, 5);
 
             double dMass = mass_next - mass_prev;
             double alpha = (mass - mass_prev) / dMass;
             CG_position = CG_prev + alpha * (CG_next - CG_prev);
             foundCG = true;
             break;
-        }
+        } /**else {
+            cout << "CG not found at mass: " << mass << endl;
+        }*/
     }
     
     // If no CG found, use last value
     if(!foundCG) {
-        CG_position = simData_(simData_.rows()-1, 4);
+        CG_position = simData_(simData_.rows()-1, 5);
     }
 
     return {CG_position, CP_position};

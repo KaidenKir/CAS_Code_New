@@ -31,7 +31,7 @@ int main() {
     sim.cas().setInnerGains(/*Kp*/ 0.0, /*Ki*/ 0.0, /*Kd*/ 0.0);
 
     // ── Set initial conditions ────────────────────────────────────────────
-    double launchAngleDeg = 0.0;
+    double launchAngleDeg = 4.0;
     Vector3d perturbation(0.0, 0.0, 0.0);  // roll, pitch, yaw offset (rad)
     Vector3d omega       (0.0, 0.0, 0.0);  // initial angular rates   (rad/s)
 

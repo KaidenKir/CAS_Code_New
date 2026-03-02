@@ -72,8 +72,8 @@ pair<Vector3d, Vector3d> RocketSimulation::aeroForcesAndMoments(const RocketStat
     double cosAlpha = clamp(velocity_unit.dot(rocketAxis), -1.0, 1.0);
     double alpha = acos(cosAlpha);
 
-    auto [cg, cp] = config_.getCGandCP(s.mass, speed);
-    double stabilityArm = cp - cg;   // positive = stable (CP behind CG)
+    auto[cg, cp] = config_.getCGandCP(s.mass, speed);
+    double stabilityArm = -(cp - cg);   // positive = stable (CP behind CG)
 
     if (fabs(alpha) > 1e-6) {
         Vector3d normalDir = rocketAxis.cross(velocity_unit);
@@ -128,7 +128,7 @@ pair<Vector3d, Vector3d> RocketSimulation::aeroForcesAndMoments(const RocketStat
             if (liftDir.norm() < 1e-8) continue;
             liftDir.normalize();
 
-            // Remove the span-wise component to get velocity in the fin plane
+            // Remove the span-wise component to  velocity in the fin plane
             Vector3d velInPlane = localVel - localVel.dot(spanVec) * spanVec;
             if (!velInPlane.allFinite()) continue;
 
@@ -318,6 +318,7 @@ void RocketSimulation::logCurrentState(){
     double thrust    = motor_.thrustAt(state_.time);
 
     auto [aeroForce, aeroMoment] = aeroForcesAndMoments(state_);
+    auto [cg, cp] = config_.getCGandCP(state_.mass, speed);
 
     // Euler angles from rotation matrix (ZYX convention → yaw, pitch, roll)
     Vector3d euler = state_.attitude.toRotationMatrix().eulerAngles(2, 1, 0);
@@ -353,6 +354,9 @@ void RocketSimulation::logCurrentState(){
     s.fin4               = state_.finDeflections[3];
     s.machNumber         = mach;
     s.dynamicPressure    = dynQ;
+    s.cg                 = cg;
+    s.cp                 = cp;
+    s.stabArm            = -(cp - cg);
 
     logger_.record(s);
 }

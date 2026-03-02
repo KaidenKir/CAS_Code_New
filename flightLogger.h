@@ -24,35 +24,38 @@ class FlightLogger{
 public:
     /** One data-point snapshot, populated externally and handed to record(). */
     struct Sample {
-        double time              = 0;
-        double positionX         = 0;
-        double positionY         = 0;
-        double positionZ         = 0;
-        double velocityMag       = 0;
-        double verticalVelocity  = 0;
-        double horizontalVelocity= 0;
-        double accelerationMag   = 0;
-        double roll              = 0;   // deg
-        double pitch             = 0;   // deg
-        double yaw               = 0;   // deg
-        double rollRate          = 0;   // deg/s
-        double pitchRate         = 0;
-        double yawRate           = 0;
-        double thrust            = 0;   // N
-        double drag              = 0;   // N
-        double mass              = 0;   // kg
-        double reqRollRate       = 0;
-        double reqPitchRate      = 0;
-        double reqYawRate        = 0;
-        double reqRollCtrl       = 0;
-        double reqPitchCtrl      = 0;
-        double reqYawCtrl        = 0;
-        double fin1              = 0;   // deg
-        double fin2              = 0;
-        double fin3              = 0;
-        double fin4              = 0;
-        double machNumber        = 0;
-        double dynamicPressure   = 0;   // Pa
+        double time              = 0.0;
+        double positionX         = 0.0;
+        double positionY         = 0.0;
+        double positionZ         = 0.0;
+        double velocityMag       = 0.0;
+        double verticalVelocity  = 0.0;
+        double horizontalVelocity= 0.0;
+        double accelerationMag   = 0.0;
+        double roll              = 0.0;   // deg
+        double pitch             = 0.0;   // deg
+        double yaw               = 0.0;   // deg
+        double rollRate          = 0.0;   // deg/s
+        double pitchRate         = 0.0;
+        double yawRate           = 0.0;
+        double thrust            = 0.0;   // N
+        double drag              = 0.0;   // N
+        double mass              = 0.0;   // kg
+        double reqRollRate       = 0.0;
+        double reqPitchRate      = 0.0;
+        double reqYawRate        = 0.0;
+        double reqRollCtrl       = 0.0;
+        double reqPitchCtrl      = 0.0;
+        double reqYawCtrl        = 0.0;
+        double fin1              = 0.0;   // deg
+        double fin2              = 0.0;
+        double fin3              = 0.0;
+        double fin4              = 0.0;
+        double machNumber        = 0.0;
+        double dynamicPressure   = 0.0;   // Pa
+        double cg                = 0.0;
+        double cp                = 0.0;
+        double stabArm           = 0.0;
     };
 
     /** Appends a sample to the internal buffers. */
@@ -76,5 +79,5 @@ private:
         reqRollRate_, reqPitchRate_, reqYawRate_,
         reqRollCtrl_, reqPitchCtrl_, reqYawCtrl_,
         fin1_, fin2_, fin3_, fin4_,
-        mach_, dynQ_;
+        mach_, dynQ_, cg_, cp_, stabArm_;
 };
