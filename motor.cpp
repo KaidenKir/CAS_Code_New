@@ -44,11 +44,11 @@ bool Motor::loadFromFile(const string& filename) {
             string initWt = extractAttribute_(engineTag, "initWt");
             if (!initWt.empty()) initialWeight = stod(initWt)/1000;
             
-            string propWt = extractAttribute(engineTag, "propWt");
+            string propWt = extractAttribute_(engineTag, "propWt");
             if (!propWt.empty()) propellantWeight = stod(propWt)/1000;
             
-            string isp = extractAttribute(engineTag, "Isp");
-            if (!isp.empty()) isp = stod(isp);
+            string ispStr = extractAttribute_(engineTag, "Isp");
+            if (!ispStr.empty()) isp = stod(ispStr);
         }
         
         // Check if entering data section
@@ -65,9 +65,9 @@ bool Motor::loadFromFile(const string& filename) {
         
         // Parse data points
         if (in_data_section && line.find("<eng-data") != string::npos) {
-            string timeStr = extractAttribute(line, "t");
-            string thrustStr = extractAttribute(line, "f");
-            string massStr = extractAttribute(line, "m");
+            string timeStr = extractAttribute_(line, "t");
+            string thrustStr = extractAttribute_(line, "f");
+            string massStr = extractAttribute_(line, "m");
             
             if (!timeStr.empty() && !thrustStr.empty() && !massStr.empty()) {
                 time.push_back(stod(timeStr));

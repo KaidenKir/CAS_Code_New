@@ -203,7 +203,7 @@ StateDerivative RocketSimulation::derivatives(const RocketState& s, double time,
 
     Vector3d gravity(0, 0, -9.81 * mass);
 
-    d.velocity - s.velocity;
+    d.velocity = s.velocity;
     d.acceleration = (thrustWorld + aeroForce + gravity) / mass;
 
     auto [lMOI, rMOI] = config_.getMOI(mass);
@@ -235,7 +235,7 @@ RocketState RocketSimulation::applyDerivative(const RocketState& s, const StateD
     RocketState ns = s;
     ns.position += d.velocity * scale;
     ns.velocity += d.acceleration * scale;
-    ns.angularVelocity= d.angularAcceleration * scale;
+    ns.angularVelocity += d.angularAcceleration * scale;
 
     Quaterniond dq = scaleQuaternion(d.quaternionDerivative, scale);
     ns.attitude = Quaterniond(s.attitude.w() + dq.w(),
@@ -282,7 +282,7 @@ void RocketSimulation::integrateRK4(double thrustForce){
     StateDerivative k3 = derivatives(s3, s3.time, thrustForce);
 
     // k4 at half step using k2
-    RocketState s4 = applyDerivative(state_, k3, dt_ / 2.0);
+    RocketState s4 = applyDerivative(state_, k3, dt_);
     s4.time = state_.time + dt_ / 2.0;
     StateDerivative k4 = derivatives(s4, s4.time, thrustForce);
 

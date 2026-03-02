@@ -11,11 +11,11 @@ public:
     // Rocket State Items
     Vector3d position        = Vector3d::Zero(); //m, WORLD FRAME
     Vector3d velocity        = Vector3d::Zero(); //m, WORLD FRAME
-    Quaterniond attitude      = Quaterniond(0, 0, 0, 1); // body -> world
+    Quaterniond attitude      = Quaterniond(1, 0, 0, 0); // body -> world
     Vector3d angularVelocity = Vector3d::Zero(); //rad/s, BODY FRAME
 
     // Rocket Guidance Items
-    Quaterniond desiredAttitude = Quaterniond(0, 0, 0, 1);
+    Quaterniond desiredAttitude = Quaterniond(1, 0, 0, 0);
     Vector4d finDeflections     = Vector4d::Zero(); //degrees, (+Y, +X, -Y, -X)
     Vector4d finCommands        = Vector4d::Zero(); //degrees (comands for logging)
 

@@ -3,9 +3,9 @@
 void RocketState::reset() {
     position        = Vector3d::Zero();
     velocity        = Vector3d::Zero();
-    attitude        = Quaterniond(0, 0, 0, 1);
+    attitude        = Quaterniond(1, 0, 0, 0);
     angularVelocity = Vector3d::Zero();
-    desiredAttitude = Quaterniond(0, 0, 0, 1);
+    desiredAttitude = Quaterniond(1, 0, 0, 0);
     finDeflections  = Vector4d::Zero();
     finCommands     = Vector4d::Zero();
     mass            = 0.0;
