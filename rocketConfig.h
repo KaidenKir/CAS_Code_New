@@ -67,4 +67,4 @@ private:
 
     //scalar linear interpolation helper
     static double linInterp(double alpha, double a, double b) {return a + alpha * (b - a);}
-}
+};

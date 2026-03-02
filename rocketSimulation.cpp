@@ -3,6 +3,7 @@
 #include "mathUtils.h"
 #include "rocketSimulation.h"
 #include "atmosphere.h"
+#include "flightLogger.h"
 #include <iostream>
 #include <iomanip>
 #include <cmath>
