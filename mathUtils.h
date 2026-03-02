@@ -91,7 +91,7 @@ inline Vector3d rotateVectorByQuaternion(const Vector3d& vec, const Quaterniond&
  * Scales all four components of a quaternion by a scalar.
  * Useful for quaternion-derivative arithmetic (does NOT produce a unit quaternion).
  */
-Quaterniond scaleQuaternion(const Quaterniond& q, double s){
+inline Quaterniond scaleQuaternion(const Quaterniond& q, double s){
     return Quaterniond(
                         q.w() * s,
                         q.x() * s,

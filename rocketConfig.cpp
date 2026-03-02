@@ -85,7 +85,7 @@ bool RocketConfig::loadSimData(const string& filename){
  *
  * col 1 = mass, col 2 = longitidinal MOI, col 3 = radial MOI
  */
-pair<double, double> getMOI(double mass){
+pair<double, double> RocketConfig::getMOI(double mass) const {
     if(simData_.rows() == 0) return {0.0, 0.0};
 
     if(mass <= simData_(0, 1)) return {simData_(0, 2), simData_(0, 3)};

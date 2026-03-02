@@ -109,10 +109,12 @@ void CASController::update(RocketState& state, double dt, double maxDeflectionDe
     timeSinceOuter_ += dt;
     timeSinceInner_ += dt;
 
+    Vector3d errVec = Vector3d::Zero();
+
     // outer loop commands
     if(timeSinceOuter_ >= outerDt){
         Quaterniond qErr = state.attitude.conjugate() * state.desiredAttitude;
-        Vector3d errVec = quaternionToAngles(qErr);
+        errVec = quaternionToAngles(qErr);
         //cout << "yaw error: " << errVec[0] << " | pitch error: " << errVec[1] << " | roll error: " << errVec[2] << endl;
 
         yawRate = yawOuter.update(errVec[0], 0.0, timeSinceOuter_);
@@ -125,8 +127,8 @@ void CASController::update(RocketState& state, double dt, double maxDeflectionDe
     // inner loop  commands
     if(timeSinceInner_ >= innerDt){
         yawCtrl = yawInner.update(state.angularVelocity[2], yawRate, timeSinceInner_);
-        pitchCtrl = pitchInner.update(errVec[1], pitchRate, timeSinceInner_);
-        rollCtrl = rollInner.update(errVec[0], rollRate, timeSinceInner_);
+        pitchCtrl = pitchInner.update(state.angularVelocity[1], pitchRate, timeSinceInner_);
+        rollCtrl = rollInner.update(state.angularVelocity[0], rollRate, timeSinceInner_);
 
         // Fin mixing: convert rad → deg and clamp
         auto finDeg = [&](double cmd) {

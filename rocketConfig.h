@@ -26,9 +26,6 @@ public:
     double diameter = 0.104;        // m  - rocket OD
     double Cn_alpha = 11.065;        // Normal force coefficient due to angle of attack (body + fins)
 
-    // data from rocket sim (kg*m^2)
-    Matrix<double, Dynamic, 6> simData; 
-
     // rocket aerodynamic properties
     double cd = 0.406;               // coeficient of drag
     double referenceArea = 0.00849;  // m^2 - cross-sectional area

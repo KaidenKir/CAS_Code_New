@@ -15,7 +15,7 @@ public:
     Vector3d angularVelocity = Vector3d::Zero(); //rad/s, BODY FRAME
 
     // Rocket Guidance Items
-    Quaterniond desiredAttitude = Quaternion(0, 0, 0, 1);
+    Quaterniond desiredAttitude = Quaterniond(0, 0, 0, 1);
     Vector4d finDeflections     = Vector4d::Zero(); //degrees, (+Y, +X, -Y, -X)
     Vector4d finCommands        = Vector4d::Zero(); //degrees (comands for logging)
 

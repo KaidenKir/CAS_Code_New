@@ -1,7 +1,7 @@
 #include <iostream>
-#include "RocketConfig.h"
-#include "Motor.h"
-#include "RocketSimulation.h"
+#include "rocketConfig.h"
+#include "motor.h"
+#include "rocketSimulation.h"
 
 using namespace std;
 
@@ -26,12 +26,12 @@ int main() {
     // ── Tune PID gains ────────────────────────────────────────────────────
     // Outer loop: converts attitude error (rad) → rate command (rad/s)
     // Inner loop: converts rate error (rad/s)  → fin deflection (rad, then deg)
-    // All zeros = open-loop (no active stabilisation).  Tune to your rocket!
+    // All zeros = open-loop (no active stabilisation).
     sim.cas().setOuterGains(/*Kp*/ 0.0, /*Ki*/ 0.0, /*Kd*/ 0.0);
     sim.cas().setInnerGains(/*Kp*/ 0.0, /*Ki*/ 0.0, /*Kd*/ 0.0);
 
     // ── Set initial conditions ────────────────────────────────────────────
-    double launchAngleDeg = 15.0;
+    double launchAngleDeg = 0.0;
     Vector3d perturbation(0.0, 0.0, 0.0);  // roll, pitch, yaw offset (rad)
     Vector3d omega       (0.0, 0.0, 0.0);  // initial angular rates   (rad/s)
 

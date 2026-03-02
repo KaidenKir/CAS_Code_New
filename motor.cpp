@@ -41,14 +41,14 @@ bool Motor::loadFromFile(const string& filename) {
             }
             
             // Now extract attributes from the complete tag
-            string initWt = extractAttribute(engineTag, "initWt");
-            if (!initWt.empty()) motor.initialWeight = stod(initWt)/1000;
+            string initWt = extractAttribute_(engineTag, "initWt");
+            if (!initWt.empty()) initialWeight = stod(initWt)/1000;
             
             string propWt = extractAttribute(engineTag, "propWt");
-            if (!propWt.empty()) motor.propellantWeight = stod(propWt)/1000;
+            if (!propWt.empty()) propellantWeight = stod(propWt)/1000;
             
             string isp = extractAttribute(engineTag, "Isp");
-            if (!isp.empty()) motor.isp = stod(isp);
+            if (!isp.empty()) isp = stod(isp);
         }
         
         // Check if entering data section
@@ -130,10 +130,10 @@ double Motor::interpolate_(double t, int col, double endValue) const {
 
 double Motor::thrustAt(double t) const {
     // Thrust goes to 0 after burn-out
-    return interpolate(t, 1, 0.0);
+    return interpolate_(t, 1, 0.0);
 }
 
 double Motor::propMassAt(double t) const {
     // Propellant mass stays at last recorded value after burn-out
-    return interpolate(t, 2, table_(table_.rows()-1, 2));
+    return interpolate_(t, 2, table_(table_.rows()-1, 2));
 }
