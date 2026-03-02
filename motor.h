@@ -51,4 +51,4 @@ private:
     // Pulls a named XML attribute value from a string, e.g. attribute="value"
     static std::string extractAttribute_(const std::string& line,
                                         const std::string& attribute);
-}
+};

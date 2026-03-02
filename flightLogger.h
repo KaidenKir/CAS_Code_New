@@ -23,7 +23,7 @@
 class FlightLogger{
 public:
     /** One data-point snapshot, populated externally and handed to record(). */
-    struct template {
+    struct Sample {
         double time              = 0;
         double positionX         = 0;
         double positionY         = 0;
@@ -77,4 +77,4 @@ private:
         reqRollCtrl_, reqPitchCtrl_, reqYawCtrl_,
         fin1_, fin2_, fin3_, fin4_,
         mach_, dynQ_;
-}
+};

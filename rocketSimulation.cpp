@@ -1,5 +1,6 @@
 //TODO: Need to finish moving all the functions over into this file
 
+#include "mathUtils.h"
 #include "rocketSimulation.h"
 #include "atmosphere.h"
 #include <iostream>
@@ -226,7 +227,7 @@ StateDerivative RocketSimulation::derivatives(const RocketState& s, double time,
     Quaterniond omegaQ(0, omega.x(), omega.y(), omega.z());
     d.quaternionDerivative = scaleQuaternion(q * omegaQ, 0.5);
 
-    return d
+    return d;
 }
 
 RocketState RocketSimulation::applyDerivative(const RocketState& s, const StateDerivative& d, double scale) const{
@@ -297,10 +298,10 @@ void RocketSimulation::integrateRK4(double thrustForce){
         w * (k1.quaternionDerivative.z() + 2*k2.quaternionDerivative.z() + 2*k3.quaternionDerivative.z() + k4.quaternionDerivative.z()) 
     );
 
-    state_.attitude = Quaterniond( state.attitude.w() + dq.w(),
-                                   state.attitude.x() + dq.x(),
-                                   state.attitude.y() + dq.y(),
-                                   state.attitude.z() + dq.z()
+    state_.attitude = Quaterniond( state_.attitude.w() + dq.w(),
+                                   state_.attitude.x() + dq.x(),
+                                   state_.attitude.y() + dq.y(),
+                                   state_.attitude.z() + dq.z()
                                 );
     state_.attitude.normalize();
 }

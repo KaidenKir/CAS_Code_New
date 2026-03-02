@@ -1,8 +1,8 @@
 #pragma once 
 
 #include <vector>
-#include "MathUtils.h"
-#include "RocketState.h" //Need to make this file
+#include "mathUtils.h"
+#include "rocketState.h" //Need to make this file
 
 /**
  * PIDController
@@ -55,7 +55,7 @@ private:
     double dFiltered_  = 0.0;
     double alpha_      = 0.0;
     bool initialized_    = false;
-}
+};
 
 class CASController{
 public:
@@ -88,4 +88,4 @@ public:
 private:
     double timeSinceOuter_ = 0.0;
     double timeSinceInner_ = 0.0;
-}
+};

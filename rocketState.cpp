@@ -1,4 +1,4 @@
-#include "RocketState.h"
+#include "rocketState.h"
 
 void RocketState::reset() {
     position        = Vector3d::Zero();

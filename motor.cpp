@@ -1,4 +1,4 @@
-#include "Motor.h"
+#include "motor.h"
 #include <fstream>
 #include <iostream>
 #include <vector>

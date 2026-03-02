@@ -1,4 +1,4 @@
-#include "FlightLogger.h"
+#include "flightLogger.h"
 #include <fstream>
 #include <iostream>
 #include <iomanip>

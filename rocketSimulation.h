@@ -1,12 +1,12 @@
 #pragma once
 #include <string>
-#include "RocketConfig.h"
-#include "Motor.h"
-#include "RocketState.h"
+#include "rocketConfig.h"
+#include "motor.h"
+#include "rocketState.h"
 #include "PIDController.h"
-#include "FlightLogger.h"
-#include "Atmosphere.h"
-#include "MathUtils.h"
+#include "flightLogger.h"
+#include "atmosphere.h"
+#include "mathUtils.h"
 
 /**
  * RocketSimulation

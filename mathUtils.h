@@ -20,23 +20,23 @@ inline double sign(double x){
 }
 
 // Checks if a variable is NaN or Infinity
-inline bool checkIfFinite(double var, string varName){
+inline bool checkIfFinite(double var, std::string varName){
     if(std::isnan(var)){
-        std::cout << varName << " is NaN" << endl;
+        std::cout << varName << " is NaN" << std::endl;
         return true;
     }else if(std::isinf(var)){
-        std::cout << varName << " is Infinity" << endl;
+        std::cout << varName << " is Infinity" << std::endl;
     }
     return false;
 }
 
 // Overload to check if a vector input has a NaN or Infinity
-inline bool checkIfFinite(Vector3d var, string varName){
+inline bool checkIfFinite(Vector3d var, std::string varName){
     if(var.hasNaN()){
-        std::cout << varName << " has NaN" << endl;
+        std::cout << varName << " has NaN" << std::endl;
         return true;
     }else if(!var.allFinite()){
-        std::cout << varName << " has Infinity" << endl;
+        std::cout << varName << " has Infinity" << std::endl;
     }
     return false;
 }
@@ -56,7 +56,7 @@ inline bool checkIfFinite(Vector3d var, string varName){
  */
 inline Vector3d quaternionToAngles(const Quaterniond& q) {
     double w = q.w(), x = q.x(), y = q.y(), z = q.z();
-    double theta = 2.0 * acos(clamp(w, -1.0, 1.0));
+    double theta = 2.0 * acos(std::clamp(w, -1.0, 1.0));
     double sin_half_theta = sqrt(x*x + y*y + z*z);
 
     if (theta < 1e-6) return 2.0 * Vector3d(x, y, z);
@@ -91,7 +91,7 @@ inline Vector3d rotateVectorByQuaternion(const Vector3d& vec, const Quaterniond&
  * Scales all four components of a quaternion by a scalar.
  * Useful for quaternion-derivative arithmetic (does NOT produce a unit quaternion).
  */
-Quaterniond multByScalar(const Quaterniond& q, double s){
+Quaterniond scaleQuaternion(const Quaterniond& q, double s){
     return Quaterniond(
                         q.w() * s,
                         q.x() * s,

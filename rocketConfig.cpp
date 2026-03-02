@@ -1,4 +1,4 @@
-#include "RocketConfig.h"
+#include "rocketConfig.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>

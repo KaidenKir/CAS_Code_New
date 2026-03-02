@@ -2,7 +2,7 @@
 
 #include "Eigen/Eigen/Dense"
 #include "Eigen/Eigen/Geometry"
-#include "MathUtils.h"
+#include "mathUtils.h"
 
 using namespace Eigen;
 
@@ -11,7 +11,7 @@ public:
     // Rocket State Items
     Vector3d position        = Vector3d::Zero(); //m, WORLD FRAME
     Vector3d velocity        = Vector3d::Zero(); //m, WORLD FRAME
-    Quaternion attitude      = Quaterniond(0, 0, 0, 1); // body -> world
+    Quaterniond attitude      = Quaterniond(0, 0, 0, 1); // body -> world
     Vector3d angularVelocity = Vector3d::Zero(); //rad/s, BODY FRAME
 
     // Rocket Guidance Items
@@ -26,7 +26,7 @@ public:
 
     /**resets to fresh rocket state */
     void reset();
-}
+};
 
 /**
  * StateDerivative
