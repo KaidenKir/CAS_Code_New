@@ -1,21 +1,17 @@
-#include "RocketSimulation.h"
+//TODO: Need to finish moving all the functions over into this file
+
+#include "rocketSimulation.h"
+#include "atmosphere.h"
 #include <iostream>
 #include <iomanip>
 #include <cmath>
 #include <chrono>
 
 using namespace std;
+using namespace Eigen;
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Constructor
-// ─────────────────────────────────────────────────────────────────────────────
-
-RocketSimulation::RocketSimulation(const RocketConfig& config, const Motor& motor)
-    : config_(config), motor_(motor)
-{
-    double motorDry     = motor_.initialWeight - motor_.propellantWeight;
-    state_.mass = config_.massDry + motorDry + motor_.propellantWeight;
-
+//constructor
+RocketSimulation::RocketSimulation(const RocketConfig& config, const Motor& motor) : config_(config), motor_(motor){
     // ── Default PID gains (all zero = open-loop, no correction) ───────────
     // Tune these before calling run():
     //   sim.cas().setOuterGains(Kp, Ki, Kd);
@@ -24,21 +20,12 @@ RocketSimulation::RocketSimulation(const RocketConfig& config, const Motor& moto
     cas_.setInnerGains(0.0, 0.0, 0.0);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Initial conditions
-// ─────────────────────────────────────────────────────────────────────────────
-
-void RocketSimulation::setInitialConditions(double launchAngleDeg,
-                                            Vector3d perturbation,
-                                            Vector3d omega) {
+//initial conditions
+void RocketSimulation::setInitialConditions(double launchAngleDeg, Vector3d perturbation, Vector3d omega) {
     state_.reset();
 
     double launchAngleRad = launchAngleDeg * M_PI / 180.0;
-    state_.attitude = eulerToQuaternion(Vector3d(
-        perturbation[0],
-        launchAngleRad + perturbation[1],
-        perturbation[2]
-    ));
+    state_.attitude = eulerToQuaternion(Vector3d(perturbation[0], launchAngleRad + perturbation[1], perturbation[2]));
     state_.angularVelocity = omega;
 
     double motorDry = motor_.initialWeight - motor_.propellantWeight;
@@ -48,12 +35,8 @@ void RocketSimulation::setInitialConditions(double launchAngleDeg,
     logger_.clear();
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Aerodynamics
-// ─────────────────────────────────────────────────────────────────────────────
-
-pair<Vector3d, Vector3d>
-RocketSimulation::aeroForcesAndMoments(const RocketState& s) const {
+//aerodynamics 
+pair<Vector3d, Vector3d> RocketSimulation::aeroForcesAndMoments(const RocketState& s) const {
     // Guard against bad velocity input
     if (s.velocity.hasNaN()) {
         cout << "Aero: velocity NaN at t=" << s.time << endl;
@@ -65,34 +48,33 @@ RocketSimulation::aeroForcesAndMoments(const RocketState& s) const {
         cout << "Aero: bad atmosphere at alt=" << s.position[2] << endl;
         return {Vector3d::Zero(), Vector3d::Zero()};
     }
-
-    double speed = s.velocity.norm();
-    if (speed < 0.1)                          // avoid ÷0 at rest
-        return {Vector3d::Zero(), Vector3d::Zero()};
-
+    
     Vector3d force  = Vector3d::Zero();
     Vector3d moment = Vector3d::Zero();
 
-    Vector3d velUnit = s.velocity / speed;
-    double   dynQ   = 0.5 * atm.density * speed * speed;
+    double speed = s.velocity.norm();
+    if (speed < 0.1) return {Vector3d::Zero(), Vector3d::Zero()}; // avoid div by zero
+
+    Vector3d velocity_unit = s.velocity / speed;
+    double dynQ = 0.5 * atm.density * speed * speed;
 
     // Velocity in the body frame (needed for canards)
     Vector3d velBody = s.attitude.conjugate()._transformVector(s.velocity);
 
-    // ── Axial drag ────────────────────────────────────────────────────────
+    //axial drag 
     // Drag opposes the velocity vector; magnitude = q * Cd * A_ref
-    force += -dynQ * config_.cd * config_.referenceArea * velUnit;
+    force += -dynQ * config_.cd * config_.referenceArea * velocity_unit;
 
     // ── Body normal force (angle of attack) ───────────────────────────────
     Vector3d rocketAxis = s.attitude._transformVector(Vector3d::UnitZ());
-    double cosAlpha = clamp(velUnit.dot(rocketAxis), -1.0, 1.0);
-    double alpha    = acos(cosAlpha);
+    double cosAlpha = clamp(velocity_unit.dot(rocketAxis), -1.0, 1.0);
+    double alpha = acos(cosAlpha);
 
     auto [cg, cp] = config_.getCGandCP(s.mass, speed);
-    double stabilityArm = -(cg - cp);   // positive = stable (CP behind CG)
+    double stabilityArm = cp - cg;   // positive = stable (CP behind CG)
 
     if (fabs(alpha) > 1e-6) {
-        Vector3d normalDir = rocketAxis.cross(velUnit);
+        Vector3d normalDir = rocketAxis.cross(velocity_unit);
         double normMag = normalDir.norm();
         if (normMag > 1e-6) {
             normalDir /= normMag;
@@ -207,70 +189,52 @@ RocketSimulation::aeroForcesAndMoments(const RocketState& s) const {
     return {force, moment};
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Equations of motion
-// ─────────────────────────────────────────────────────────────────────────────
-
-StateDerivative RocketSimulation::derivatives(const RocketState& s,
-                                              double time,
-                                              double thrustForce) const {
+StateDerivative RocketSimulation::derivatives(const RocketState& s, double time, double thrustForce) const{
     StateDerivative d;
 
-    // Recompute mass from the propellant table (important for mid-step RK4 calls)
     double propMass = motor_.propMassAt(time);
     double motorDry = motor_.initialWeight - motor_.propellantWeight;
     double mass     = config_.massDry + motorDry + propMass;
-
+    
     auto [aeroForce, aeroMoment] = aeroForcesAndMoments(s);
-
-    // Thrust acts along body +Z, rotated to world frame
     Vector3d thrustWorld = s.attitude._transformVector(Vector3d(0, 0, thrustForce));
 
-    // Gravity acts in world −Z
     Vector3d gravity(0, 0, -9.81 * mass);
 
-    // ── Translational EOM ─────────────────────────────────────────────────
-    d.velocity     = s.velocity;                        // dx/dt = v
-    d.acceleration = (thrustWorld + aeroForce + gravity) / mass;  // dv/dt = F/m
+    d.velocity - s.velocity;
+    d.acceleration = (thrustWorld + aeroForce + gravity) / mass;
 
-    // ── Rotational EOM (Euler's equations in the body frame) ──────────────
     auto [lMOI, rMOI] = config_.getMOI(mass);
     Matrix3d I = Matrix3d::Zero();
-    I(0,0) = rMOI;  I(1,1) = rMOI;  I(2,2) = lMOI;
+    I(0, 0) = rMOI;
+    I(1, 1) = rMOI;
+    I(2, 2) = lMOI;
 
     Vector3d omega = s.angularVelocity;
 
-    // d(ω)/dt = I⁻¹ · (M - ω × (I·ω))
-    // The term  ω × (I·ω)  is the gyroscopic (Coriolis) effect: when the
-    // rocket spins, the angular momentum vector tries to stay fixed in space,
-    // creating an apparent torque that needs to be subtracted.
-    Vector3d gyroscopic   = omega.cross(I * omega);
-    d.angularAcceleration = I.inverse() * (aeroMoment - gyroscopic);
+    // eulers rotation equation in body frame
+    // includes gyroscopic effects 
+    // d(omega)/dt = I^-1 * (M - omega X (I*omega))
+    Vector3d gyroscopicTerm = omega.cross(I * omega);
+    d.angularAcceleration = I.inverse() * (aeroMoment - gyroscopicTerm);
 
     // ── Quaternion derivative ─────────────────────────────────────────────
     // d(q)/dt = 0.5 * q * ω_quat
     // where ω_quat is the angular velocity as a pure quaternion (0, ωx, ωy, ωz).
     // This propagates the attitude quaternion forward in time.
-    Quaterniond q       = s.attitude.normalized();
+    Quaternion q = s.attitude.normalized();
     Quaterniond omegaQ(0, omega.x(), omega.y(), omega.z());
     d.quaternionDerivative = scaleQuaternion(q * omegaQ, 0.5);
 
-    return d;
+    return d
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  RK4 helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-RocketState RocketSimulation::applyDerivative(const RocketState& s,
-                                              const StateDerivative& d,
-                                              double scale) const {
+RocketState RocketSimulation::applyDerivative(const RocketState& s, const StateDerivative& d, double scale) const{
     RocketState ns = s;
-    ns.position        += d.velocity            * scale;
-    ns.velocity        += d.acceleration        * scale;
-    ns.angularVelocity += d.angularAcceleration * scale;
+    ns.position += d.velocity * scale;
+    ns.velocity += d.acceleration * scale;
+    ns.angularVelocity= d.angularAcceleration * scale;
 
-    // Add the scaled quaternion increment component-wise (not normalised yet)
     Quaterniond dq = scaleQuaternion(d.quaternionDerivative, scale);
     ns.attitude = Quaterniond(s.attitude.w() + dq.w(),
                               s.attitude.x() + dq.x(),
@@ -296,56 +260,55 @@ RocketState RocketSimulation::applyDerivative(const RocketState& s,
  * the method 4th-order accurate — errors are proportional to dt⁴ instead
  * of dt, allowing much larger timesteps for the same accuracy.
  */
-void RocketSimulation::integrateRK4(double thrustForce) {
-    // Refresh mass from motor table
+void RocketSimulation::integrateRK4(double thrustForce){
+    // update mass for current time
     double propMass = motor_.propMassAt(state_.time);
     double motorDry = motor_.initialWeight - motor_.propellantWeight;
-    state_.mass     = config_.massDry + motorDry + propMass;
+    state_.mass = config_.massDry + motorDry + propMass;
 
     // k1 at current state
     StateDerivative k1 = derivatives(state_, state_.time, thrustForce);
 
-    // k2 at half-step using k1
+    // k2 at half step using k1
     RocketState s2 = applyDerivative(state_, k1, dt_ / 2.0);
-    s2.time        = state_.time + dt_ / 2.0;
+    s2.time = state_.time + dt_ / 2.0;
     StateDerivative k2 = derivatives(s2, s2.time, thrustForce);
 
-    // k3 at half-step using k2
+    // k3 at half step using k2
     RocketState s3 = applyDerivative(state_, k2, dt_ / 2.0);
-    s3.time        = state_.time + dt_ / 2.0;
+    s3.time = state_.time + dt_ / 2.0;
     StateDerivative k3 = derivatives(s3, s3.time, thrustForce);
 
-    // k4 at full step using k3
-    RocketState s4 = applyDerivative(state_, k3, dt_);
-    s4.time        = state_.time + dt_;
+    // k4 at half step using k2
+    RocketState s4 = applyDerivative(state_, k3, dt_ / 2.0);
+    s4.time = state_.time + dt_ / 2.0;
     StateDerivative k4 = derivatives(s4, s4.time, thrustForce);
 
     // Weighted sum
     double w = dt_ / 6.0;
-    state_.position        += w * (k1.velocity            + 2*k2.velocity            + 2*k3.velocity            + k4.velocity           );
-    state_.velocity        += w * (k1.acceleration        + 2*k2.acceleration        + 2*k3.acceleration        + k4.acceleration       );
-    state_.angularVelocity += w * (k1.angularAcceleration + 2*k2.angularAcceleration + 2*k3.angularAcceleration + k4.angularAcceleration );
+    state_.position += w * (k1.velocity + 2*k2.velocity + 2*k3.velocity + k4.velocity);
+    state_.velocity+= w * (k1.acceleration + 2*k2.acceleration + 2*k3.acceleration + k4.acceleration);
+    state_.angularVelocity += w * (k1.angularAcceleration + 2*k2.angularAcceleration + 2*k3.angularAcceleration + k4.angularAcceleration);
 
-    // Quaternion weighted sum (component-wise, then normalise)
-    auto wQ = [&](const StateDerivative& k) { return scaleQuaternion(k.quaternionDerivative, 1.0); };
     Quaterniond dq(
-        w * (k1.quaternionDerivative.w() + 2*k2.quaternionDerivative.w() + 2*k3.quaternionDerivative.w() + k4.quaternionDerivative.w()),
-        w * (k1.quaternionDerivative.x() + 2*k2.quaternionDerivative.x() + 2*k3.quaternionDerivative.x() + k4.quaternionDerivative.x()),
-        w * (k1.quaternionDerivative.y() + 2*k2.quaternionDerivative.y() + 2*k3.quaternionDerivative.y() + k4.quaternionDerivative.y()),
-        w * (k1.quaternionDerivative.z() + 2*k2.quaternionDerivative.z() + 2*k3.quaternionDerivative.z() + k4.quaternionDerivative.z())
+        w * (k1.quaternionDerivative.w() + 2*k2.quaternionDerivative.w() + 2*k3.quaternionDerivative.w() + k4.quaternionDerivative.w()), 
+        w * (k1.quaternionDerivative.x() + 2*k2.quaternionDerivative.x() + 2*k3.quaternionDerivative.x() + k4.quaternionDerivative.x()), 
+        w * (k1.quaternionDerivative.y() + 2*k2.quaternionDerivative.y() + 2*k3.quaternionDerivative.y() + k4.quaternionDerivative.y()), 
+        w * (k1.quaternionDerivative.z() + 2*k2.quaternionDerivative.z() + 2*k3.quaternionDerivative.z() + k4.quaternionDerivative.z()) 
     );
-    state_.attitude = Quaterniond(state_.attitude.w() + dq.w(),
-                                  state_.attitude.x() + dq.x(),
-                                  state_.attitude.y() + dq.y(),
-                                  state_.attitude.z() + dq.z());
+
+    state_.attitude = Quaterniond( state.attitude.w() + dq.w(),
+                                   state.attitude.x() + dq.x(),
+                                   state.attitude.y() + dq.y(),
+                                   state.attitude.z() + dq.z()
+                                );
     state_.attitude.normalize();
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Data logging
-// ─────────────────────────────────────────────────────────────────────────────
-
-void RocketSimulation::logCurrentState() {
+/**
+ * Data Logging
+ */
+void RocketSimulation::logCurrentState(){
     Atmosphere atm   = Atmosphere::at(state_.position[2]);
     double speed     = state_.velocity.norm();
     double mach      = speed / atm.speedOfSound;
@@ -392,10 +355,9 @@ void RocketSimulation::logCurrentState() {
     logger_.record(s);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Main simulation loop
-// ─────────────────────────────────────────────────────────────────────────────
-
+/**
+ * Main Simulation Loop
+ */
 bool RocketSimulation::run(double maxTime, const string& outputFile, int logInterval) {
     cout << "Starting simulation  |  initial mass: " << state_.mass << " kg"
          << "  |  max time: " << maxTime << " s" << endl;
