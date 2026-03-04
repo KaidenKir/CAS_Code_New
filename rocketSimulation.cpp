@@ -288,8 +288,8 @@ void RocketSimulation::integrateRK4(double thrustForce){
 
     // Weighted sum
     double w = dt_ / 6.0;
-    state_.position += w * (k1.velocity + 2*k2.velocity + 2*k3.velocity + k4.velocity);
-    state_.velocity+= w * (k1.acceleration + 2*k2.acceleration + 2*k3.acceleration + k4.acceleration);
+    state_.position        += w * (k1.velocity + 2*k2.velocity + 2*k3.velocity + k4.velocity);
+    state_.velocity        += w * (k1.acceleration + 2*k2.acceleration + 2*k3.acceleration + k4.acceleration);
     state_.angularVelocity += w * (k1.angularAcceleration + 2*k2.angularAcceleration + 2*k3.angularAcceleration + k4.angularAcceleration);
 
     Quaterniond dq(

@@ -31,14 +31,14 @@ int main() {
     sim.cas().setInnerGains(/*Kp*/ 0.0, /*Ki*/ 0.0, /*Kd*/ 0.0);
 
     // ── Set initial conditions ────────────────────────────────────────────
-    double launchAngleDeg = 4.0;
+    double launchAngleDeg = 1.0;
     Vector3d perturbation(0.0, 0.0, 0.0);  // roll, pitch, yaw offset (rad)
     Vector3d omega       (0.0, 0.0, 0.0);  // initial angular rates   (rad/s)
 
     sim.setInitialConditions(launchAngleDeg, perturbation, omega);
 
     // ── Run ───────────────────────────────────────────────────────────────
-    if (sim.run(30.0, "rocket_flight_data.csv")) {
+    if (sim.run(30.0, "rocket_flight_data.csv", 10)) {
         cout << "Done. Data saved to rocket_flight_data.csv" << endl;
     } else {
         cerr << "Simulation failed." << endl;
